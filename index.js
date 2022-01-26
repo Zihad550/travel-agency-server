@@ -21,7 +21,7 @@ async function run() {
     const database = client.db("travelAgency");
     const blogsCollection = database.collection("blogs");
 
-    // get all blogs
+    // get  blogs
     app.get("/blogs", async (req, res) => {
       const { page, size } = req.query;
       const cursor = blogsCollection.find({});
@@ -37,6 +37,20 @@ async function run() {
       }
 
       res.json({ blogs, count });
+    });
+
+    // save blogs
+    app.post("/blogs", async (req, res) => {
+      const blog = req.body;
+      const result = await blogsCollection.insertOne(blog);
+      res.json(result);
+    });
+
+    // delete a blog
+    app.delete("/blogs", async (req, res) => {
+      const id = req.query.id;
+      const result = await blogsCollection.deleteOne({ _id: ObjectId(id) });
+      res.json(result);
     });
   } finally {
   }
