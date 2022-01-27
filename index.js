@@ -33,7 +33,7 @@ async function run() {
       if (status === "approved") {
         cursor = blogsCollection.find({ status });
       } else {
-        cursor = blogsCollection.find({});
+        cursor = blogsCollection.find({ status: { $ne: "approved" } });
       }
       let blogs;
       const count = await cursor.count();
@@ -73,6 +73,15 @@ async function run() {
         image: imageBuffer,
       };
       const result = await blogsCollection.insertOne(blog);
+      res.json(result);
+    });
+
+    app.put("/blogs", async (req, res) => {
+      const { id } = req.query;
+      const result = await blogsCollection.updateOne(
+        { _id: ObjectId(id) },
+        { $set: { status: "approved" } }
+      );
       res.json(result);
     });
   } finally {
