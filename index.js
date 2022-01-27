@@ -22,9 +22,9 @@ const client = new MongoClient(process.env.URI, {
 async function run() {
   try {
     await client.connect();
-
     const database = client.db("travelAgency");
     const blogsCollection = database.collection("blogs");
+    const usersCollection = database.collection("users");
 
     // get  blogs
     app.get("/blogs", async (req, res) => {
@@ -49,13 +49,6 @@ async function run() {
       res.json({ blogs, count });
     });
 
-    // save blogs
-    /* app.post("/blogs", async (req, res) => {
-      const blog = req.body;
-      const result = await blogsCollection.insertOne(blog);
-      res.json(result);
-    }); */
-
     // delete a blog
     app.delete("/blogs", async (req, res) => {
       const id = req.query.id;
@@ -65,15 +58,22 @@ async function run() {
 
     app.post("/blogs", async (req, res) => {
       const pic = req.files.src;
-      const picData = pic.data;
-      const encodedPic = picData.toString("base64");
-      const imageBuffer = Buffer.from(encodedPic, "base64");
-      const blog = {
-        ...req.body,
-        image: imageBuffer,
-      };
-      const result = await blogsCollection.insertOne(blog);
-      res.json(result);
+      if (pic.size > 200000) {
+        res.json({
+          error: "Please select a image file less then 200kb",
+        });
+      } else {
+        const picData = pic.data;
+
+        const encodedPic = picData.toString("base64");
+        const imageBuffer = Buffer.from(encodedPic, "base64");
+        const blog = {
+          ...req.body,
+          image: imageBuffer,
+        };
+        const result = await blogsCollection.insertOne(blog);
+        res.json(result);
+      }
     });
 
     app.put("/blogs", async (req, res) => {
@@ -81,6 +81,24 @@ async function run() {
       const result = await blogsCollection.updateOne(
         { _id: ObjectId(id) },
         { $set: { status: "approved" } }
+      );
+      res.json(result);
+    });
+
+    // user routes
+    // post user
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.json(result);
+    });
+
+    // update user to super user
+    app.put("/users", async (req, res) => {
+      const email = req.body;
+      const result = await usersCollection.updateOne(
+        { email },
+        { $set: { role: "admin" } }
       );
       res.json(result);
     });
