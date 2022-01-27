@@ -86,6 +86,11 @@ async function run() {
     });
 
     // user routes
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await usersCollection.findOne({ email });
+      res.json(result);
+    });
     // post user
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -93,12 +98,24 @@ async function run() {
       res.json(result);
     });
 
-    // update user to super user
+    // update user
     app.put("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.updateOne(
+        { email: user.email },
+        { $set: user },
+        { upsert: true }
+      );
+      res.json(result);
+    });
+
+    // update user to super user
+    app.put("/users/admin", async (req, res) => {
       const email = req.body;
       const result = await usersCollection.updateOne(
         { email },
-        { $set: { role: "admin" } }
+        { $set: { role: "admin" } },
+        { upsert: true }
       );
       res.json(result);
     });
