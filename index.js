@@ -28,12 +28,25 @@ async function run() {
 
     // get  blogs
     app.get("/blogs", async (req, res) => {
-      const { page, size, status } = req.query;
+      const { page, size, status, filter } = req.query;
+      console.log(filter);
       let cursor;
       if (status === "approved") {
-        cursor = blogsCollection.find({ status });
+        if (filter === "topRated") {
+          cursor = blogsCollection.find({ status }).sort({ rating: -1 });
+        } else if (filter === "leastRated") {
+          cursor = blogsCollection.find({ status }).sort({ rating: 1 });
+        } else if (filter === "mostExpensive") {
+          cursor = blogsCollection.find({ status }).sort({ expense: -1 });
+        } else if (filter === "leastExpensive") {
+          cursor = blogsCollection.find({ status }).sort({ expense: 1 });
+        } else {
+          cursor = blogsCollection.find({ status });
+        }
       } else {
-        cursor = blogsCollection.find({ status: { $ne: "approved" } });
+        cursor = blogsCollection
+          .find({ status: { $ne: "approved" } })
+          .sort({ rating: -1 });
       }
       let blogs;
       const count = await cursor.count();
