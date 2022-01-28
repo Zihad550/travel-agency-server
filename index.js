@@ -133,8 +133,7 @@ async function run() {
       const email = req.body;
       const result = await usersCollection.updateOne(
         { email },
-        { $set: { role: "admin" } },
-        { upsert: true }
+        { $set: { role: "admin" } }
       );
       res.json(result);
     });
