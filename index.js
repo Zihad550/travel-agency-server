@@ -99,10 +99,16 @@ async function run() {
     });
 
     // user routes
+    // check if the user is admin
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
-      const result = await usersCollection.findOne({ email });
-      res.json(result);
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      let isAdmin = false;
+      if (user?.role === "admin") {
+        isAdmin = true;
+      }
+      res.json({ admin: isAdmin });
     });
     // post user
     app.post("/users", async (req, res) => {
