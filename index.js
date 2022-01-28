@@ -128,13 +128,12 @@ async function run() {
       res.json(result);
     });
 
-    // update user to super user
+    // update user to admin
     app.put("/users/admin", async (req, res) => {
-      const email = req.body;
-      const result = await usersCollection.updateOne(
-        { email },
-        { $set: { role: "admin" } }
-      );
+      const user = req.body;
+      const filter = { email: user.email };
+      const updateDoc = { $set: { role: "admin" } };
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
   } finally {
