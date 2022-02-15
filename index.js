@@ -27,7 +27,7 @@ async function run() {
     const usersCollection = database.collection("users");
 
     // get  blogs
-    app.get("/blogs", async (req, res) => {
+    /* app.get("/blogs", async (req, res) => {
       const { page, size, status, filter } = req.query;
       console.log(filter);
       let cursor;
@@ -40,6 +40,58 @@ async function run() {
           cursor = blogsCollection.find({ status }).sort({ expense: -1 });
         } else if (filter === "leastExpensive") {
           cursor = blogsCollection.find({ status }).sort({ expense: 1 });
+        } else {
+          cursor = blogsCollection.find({ status });
+        }
+      } else {
+        cursor = blogsCollection
+          .find({ status: { $ne: "approved" } })
+          .sort({ rating: -1 });
+      }
+      let blogs;
+      const count = await cursor.count();
+      if (page) {
+        blogs = await cursor
+          .skip(page * size)
+          .limit(parseInt(size))
+          .toArray();
+      } else {
+        blogs = await cursor.toArray();
+      }
+
+      res.json({ blogs, count });
+    }); */
+    app.get("/blogs", async (req, res) => {
+      const {
+        page,
+        size,
+        status,
+        filter,
+        author,
+        country,
+        minPrice,
+        maxPrice,
+      } = req.query;
+      console.log(author, country, minPrice, maxPrice);
+      console.log(filter);
+      let cursor;
+      if (status === "approved") {
+        if (filter === "topRated") {
+          cursor = blogsCollection.find({ status }).sort({ rating: -1 });
+        } else if (filter === "leastRated") {
+          cursor = blogsCollection.find({ status }).sort({ rating: 1 });
+        } else if (filter === "mostExpensive") {
+          cursor = blogsCollection.find({ status }).sort({ expense: -1 });
+        } else if (filter === "leastExpensive") {
+          cursor = blogsCollection.find({ status }).sort({ expense: 1 });
+        } else if (author) {
+          cursor = blogsCollection.find({
+            $and: [{ status }, { author }],
+          });
+        } else if (country) {
+          cursor = blogsCollection.find({
+            $and: [{ status }, { location: country }],
+          });
         } else {
           cursor = blogsCollection.find({ status });
         }
