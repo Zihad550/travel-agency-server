@@ -71,9 +71,12 @@ async function run() {
         country,
         minPrice,
         maxPrice,
+        applyFilter,
       } = req.query;
-      console.log(author, country, minPrice, maxPrice);
-      console.log(filter);
+      console.log(typeof applyFilter);
+      console.log(author, country, minPrice, maxPrice, applyFilter);
+      console.log(country.length);
+      console.log(status);
       let cursor;
       if (status === "approved") {
         if (filter === "topRated") {
@@ -84,15 +87,30 @@ async function run() {
           cursor = blogsCollection.find({ status }).sort({ expense: -1 });
         } else if (filter === "leastExpensive") {
           cursor = blogsCollection.find({ status }).sort({ expense: 1 });
-        } else if (author) {
+        }
+        // apply custom filter start
+        /* else if (author !== undefined && country && minPrice && maxPrice) {
           cursor = blogsCollection.find({
-            $and: [{ status }, { author }],
+            $and: [
+              { status },
+              { author },
+              { location: country },
+              { expense: { $gte: minPrice, $lte: maxPrice } },
+            ],
           });
-        } else if (country) {
+        } */
+        else if (country !== "") {
           cursor = blogsCollection.find({
             $and: [{ status }, { location: country }],
           });
-        } else {
+        } else if (author !== "") {
+          cursor = blogsCollection.find({
+            $and: [{ status }, { author }],
+          });
+        }
+
+        // apply custom filter end
+        else {
           cursor = blogsCollection.find({ status });
         }
       } else {
