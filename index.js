@@ -73,7 +73,7 @@ async function run() {
         maxPrice,
         applyFilter,
       } = req.query;
-      console.log(typeof applyFilter);
+      console.log(typeof parseInt(minPrice));
       console.log(author, country, minPrice, maxPrice, applyFilter);
       console.log(country.length);
       console.log(status);
@@ -87,30 +87,30 @@ async function run() {
           cursor = blogsCollection.find({ status }).sort({ expense: -1 });
         } else if (filter === "leastExpensive") {
           cursor = blogsCollection.find({ status }).sort({ expense: 1 });
-        }
-        // apply custom filter start
-        /* else if (author !== undefined && country && minPrice && maxPrice) {
+        } else if (
+          applyFilter === "true" &&
+          author !== "Select Author name" &&
+          country !== "Select Country"
+        ) {
           cursor = blogsCollection.find({
-            $and: [
-              { status },
-              { author },
-              { location: country },
-              { expense: { $gte: minPrice, $lte: maxPrice } },
-            ],
-          });
-        } */
-        else if (country !== "") {
-          cursor = blogsCollection.find({
-            $and: [{ status }, { location: country }],
-          });
-        } else if (author !== "") {
-          cursor = blogsCollection.find({
-            $and: [{ status }, { author }],
+            $and: [{ status }, { author }, { location: country }],
           });
         }
 
-        // apply custom filter end
-        else {
+        // apply custom filter start
+        else if (applyFilter === "true" && author !== "Select Author name") {
+          cursor = blogsCollection.find({
+            $and: [{ status }, { author }],
+          });
+        } else if (applyFilter === "true" && country !== "Select Country") {
+          cursor = blogsCollection.find({
+            $and: [
+              { status },
+              { location: country },
+              // { expense: { $gte: minPrice, $lte: maxPrice } },
+            ],
+          });
+        } else {
           cursor = blogsCollection.find({ status });
         }
       } else {
@@ -172,8 +172,7 @@ async function run() {
     // check if the user is admin
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { email };
-      const user = await usersCollection.findOne(query);
+      const user = await usersCollection.findOne({ email });
       let isAdmin = false;
       if (user?.role === "admin") {
         isAdmin = true;
