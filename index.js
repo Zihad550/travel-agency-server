@@ -73,10 +73,6 @@ async function run() {
         maxPrice,
         applyFilter,
       } = req.query;
-      console.log(typeof parseInt(minPrice));
-      console.log(author, country, minPrice, maxPrice, applyFilter);
-      console.log(country.length);
-      console.log(status);
       let cursor;
       if (status === "approved") {
         if (filter === "topRated") {
